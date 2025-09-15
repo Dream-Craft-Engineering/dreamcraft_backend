@@ -18,7 +18,8 @@ def create_user(db: Session, user: schemas.UserCreate):
         email=user.email,
         name=user.name,
         phone_number=user.phone_number,
-        hashed_password=hashed_pw
+        hashed_password=hashed_pw,
+        role_id=user.role_id # Add role_id
     )
     db.add(db_user)
     db.commit()
@@ -46,12 +47,37 @@ def delete_user(db: Session, user_id: int):
     return db_user
 
 
-# backend/app/crud.py
-from sqlalchemy.orm import Session, joinedload
-from . import models, schemas
-from .auth import hash_password
+def get_role(db: Session, role_id: int):
+    return db.query(models.Role).filter(models.Role.id == role_id).first()
 
-# ... (user functions) ...
+def get_roles(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Role).offset(skip).limit(limit).all()
+
+def create_role(db: Session, role: schemas.RoleCreate):
+    db_role = models.Role(name=role.name)
+    db.add(db_role)
+    db.commit()
+    db.refresh(db_role)
+    return db_role
+
+def update_role(db: Session, role_id: int, role_update: schemas.RoleUpdate):
+    db_role = get_role(db, role_id)
+    if not db_role:
+        return None
+    update_data = role_update.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_role, key, value)
+    db.commit()
+    db.refresh(db_role)
+    return db_role
+
+def delete_role(db: Session, role_id: int):
+    db_role = get_role(db, role_id)
+    if db_role:
+        db.delete(db_role)
+        db.commit()
+    return db_role
+
 
 def create_blog(db: Session, blog: schemas.BlogCreate, author_id: int):
     db_blog = models.Blog(**blog.dict(), author_id=author_id)

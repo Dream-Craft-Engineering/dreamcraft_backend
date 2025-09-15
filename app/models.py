@@ -1,7 +1,12 @@
-# backend/app/models.py
 from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey
-from sqlalchemy.orm import relationship 
+from sqlalchemy.orm import relationship
 from .database import Base
+
+class Role(Base):
+    __tablename__ = "roles"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True, index=True)
+    users = relationship("User", back_populates="role")
 
 class User(Base):
     __tablename__ = "users"
@@ -11,7 +16,11 @@ class User(Base):
     phone_number = Column(String(20), nullable=True)
     hashed_password = Column(String(128), nullable=False)
     is_active = Column(Boolean, default=True)
-   
+    
+    # Add the relationship to Role
+    role_id = Column(Integer, ForeignKey("roles.id"))
+    role = relationship("Role", back_populates="users")
+
     blogs = relationship("Blog", back_populates="author")
 
 class Blog(Base):

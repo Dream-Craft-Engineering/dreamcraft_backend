@@ -2,6 +2,21 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
+# --- Role Schemas ---
+class RoleBase(BaseModel):
+    name: str
+
+class RoleCreate(RoleBase):
+    pass
+
+class RoleUpdate(BaseModel):
+    name: Optional[str] = None
+
+class Role(RoleBase):
+    id: int
+    class Config:
+        from_attributes = True
+
 # --- User Schemas ---
 class UserBase(BaseModel):
     email: EmailStr
@@ -11,12 +26,25 @@ class UserBase(BaseModel):
 class User(UserBase):
     id: int
     is_active: bool
+    role: Role
     class Config:
         from_attributes = True
 
-# --- Blog Schemas ---
+# --- THIS IS THE CORRECTED CLASS ---
+class UserCreate(UserBase):
+    password: str
+    role_id: int # The role_id field must be here
+
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    name: Optional[str] = None
+    phone_number: Optional[str] = None
+    password: Optional[str] = None
+    is_active: Optional[bool] = None
+    role_id: Optional[int] = None
+
+# --- Blog and Token Schemas ---
 class BlogBase(BaseModel):
-    # --- THIS BLOCK IS NOW CORRECTLY INDENTED ---
     slug: str
     title: str
     content: str
@@ -27,7 +55,6 @@ class BlogBase(BaseModel):
     image_url: Optional[str] = None
     image_url_2: Optional[str] = None
     image_url_3: Optional[str] = None
-    # ---------------------------------------------
 
 class BlogCreate(BlogBase):
     pass
@@ -37,9 +64,9 @@ class BlogUpdate(BaseModel):
     content: Optional[str] = None
     category: Optional[str] = None
     date: Optional[str] = None
+    image_url: Optional[str] = None
     excerpt: Optional[str] = None
     is_featured: Optional[bool] = None
-    image_url: Optional[str] = None
     image_url_2: Optional[str] = None
     image_url_3: Optional[str] = None
 
@@ -51,17 +78,6 @@ class Blog(BlogBase):
     class Config:
         from_attributes = True
 
-# --- Other Schemas ---
 class Token(BaseModel):
     access_token: str
     token_type: str
-
-class UserCreate(UserBase):
-    password: str
-
-class UserUpdate(BaseModel):
-    email: Optional[EmailStr] = None
-    name: Optional[str] = None
-    phone_number: Optional[str] = None
-    password: Optional[str] = None
-    is_active: Optional[bool] = None
