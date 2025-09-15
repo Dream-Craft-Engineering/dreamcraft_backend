@@ -3,12 +3,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from .models import Base
-from .routers import auth, users, roles, blogs  # Import your routers
+from .routers import auth, users
 from .core import settings
 
 app = FastAPI(title=settings.app_name)
 
-# CORS middleware (allows Next.js to call APIs)
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.backend_cors_origins,
@@ -20,8 +20,6 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router)
 app.include_router(users.router)
-app.include_router(roles.router)
-app.include_router(blogs.router)
 
-# For dev only: Create tables (comment out after initial setup; use Alembic for migrations)
+# To use Alembic for migrations, it's better to remove or comment this out
 # Base.metadata.create_all(bind=engine)

@@ -17,14 +17,10 @@ down_revision: Union[str, Sequence[str], None] = ${repr(down_revision)}
 branch_labels: Union[str, Sequence[str], None] = ${repr(branch_labels)}
 depends_on: Union[str, Sequence[str], None] = ${repr(depends_on)}
 
-def upgrade():
-op.add_column('users', sa.Column('name', sa.String(100), nullable=False))
-    op.add_column('users', sa.Column('phone_number', sa.String(20), nullable=True))
+
+def upgrade() -> None:
+    ${upgrades if upgrades else "pass"}
+
 
 def downgrade() -> None:
-    """Downgrade schema."""
     ${downgrades if downgrades else "pass"}
-
-    def downgrade():
-    op.drop_column('users', 'phone_number')
-    op.drop_column('users', 'name')

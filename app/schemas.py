@@ -1,38 +1,25 @@
 # backend/app/schemas.py
 from pydantic import BaseModel, EmailStr
-
-class RoleBase(BaseModel):
-    name: str
-
-class RoleCreate(RoleBase):
-    pass
-
-class RoleUpdate(BaseModel):
-    name: str | None = None
-
-class Role(RoleBase):
-    id: int
-
-    class Config:
-        from_attributes = True  # For ORM mode
+from typing import Optional
 
 class UserBase(BaseModel):
     email: EmailStr
+    name: str
+    phone_number: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str
-    role_id: int
 
 class UserUpdate(BaseModel):
-    email: EmailStr | None = None
-    password: str | None = None
-    role_id: int | None = None
-    is_active: bool | None = None
+    email: Optional[EmailStr] = None
+    name: Optional[str] = None
+    phone_number: Optional[str] = None
+    password: Optional[str] = None
+    is_active: Optional[bool] = None
 
 class User(UserBase):
     id: int
     is_active: bool
-    role: Role
 
     class Config:
         from_attributes = True
@@ -40,21 +27,3 @@ class User(UserBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
-
-class BlogBase(BaseModel):
-    title: str
-    content: str
-
-class BlogCreate(BlogBase):
-    pass
-
-class BlogUpdate(BaseModel):
-    title: str | None = None
-    content: str | None = None
-
-class Blog(BlogBase):
-    id: int
-    user_id: int
-
-    class Config:
-        from_attributes = True
