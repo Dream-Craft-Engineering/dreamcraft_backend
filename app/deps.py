@@ -24,7 +24,6 @@ async def get_current_user(db: Session = Depends(get_db), token: str = Depends(o
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        # The 'sub' claim in the token should be the user's ID
         user_id = int(payload.get("sub"))
         if user_id is None:
             raise credentials_exception

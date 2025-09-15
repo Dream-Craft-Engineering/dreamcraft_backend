@@ -1,5 +1,5 @@
 # backend/app/crud.py
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session,joinedload 
 from . import models, schemas
 from .auth import hash_password
 
@@ -44,3 +44,45 @@ def delete_user(db: Session, user_id: int):
         db.delete(db_user)
         db.commit()
     return db_user
+
+
+# backend/app/crud.py
+from sqlalchemy.orm import Session, joinedload
+from . import models, schemas
+from .auth import hash_password
+
+# ... (user functions) ...
+
+def create_blog(db: Session, blog: schemas.BlogCreate, author_id: int):
+    db_blog = models.Blog(**blog.dict(), author_id=author_id)
+    db.add(db_blog)
+    db.commit()
+    db.refresh(db_blog)
+    return db_blog
+
+def get_blog(db: Session, blog_id: int):
+    return db.query(models.Blog).options(joinedload(models.Blog.author)).filter(models.Blog.id == blog_id).first()
+
+def get_blog_by_slug(db: Session, slug: str):
+    return db.query(models.Blog).options(joinedload(models.Blog.author)).filter(models.Blog.slug == slug).first()
+
+def get_blogs(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Blog).options(joinedload(models.Blog.author)).offset(skip).limit(limit).all()
+
+def update_blog(db: Session, blog_id: int, blog_update: schemas.BlogUpdate):
+    db_blog = get_blog(db, blog_id)
+    if not db_blog:
+        return None
+    update_data = blog_update.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_blog, key, value)
+    db.commit()
+    db.refresh(db_blog)
+    return db_blog
+
+def delete_blog(db: Session, blog_id: int):
+    db_blog = get_blog(db, blog_id)
+    if db_blog:
+        db.delete(db_blog)
+        db.commit()
+    return db_blog

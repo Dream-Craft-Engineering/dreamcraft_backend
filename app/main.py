@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from .models import Base
-from .routers import auth, users
+from .routers import auth, users,blogs
 from .core import settings
 
 app = FastAPI(title=settings.app_name)
@@ -20,6 +20,4 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router)
 app.include_router(users.router)
-
-# To use Alembic for migrations, it's better to remove or comment this out
-# Base.metadata.create_all(bind=engine)
+app.include_router(blogs.router)
