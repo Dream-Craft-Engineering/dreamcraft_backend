@@ -1,6 +1,6 @@
 # backend/app/schemas.py
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List 
+from typing import Optional, List # <--- THIS IS THE FIX
 
 # --- Role Schemas ---
 class RoleBase(BaseModel):
@@ -42,8 +42,10 @@ class UserUpdate(BaseModel):
     is_active: Optional[bool] = None
     role_id: Optional[int] = None
 
+# --- NEW Category Schemas ---
 class CategoryBase(BaseModel):
     name: str
+    description: Optional[str] = None
 
 class CategoryCreate(CategoryBase):
     pass
@@ -53,9 +55,10 @@ class Category(CategoryBase):
     class Config:
         from_attributes = True
 
-
+# --- NEW Tag Schemas ---
 class TagBase(BaseModel):
     name: str
+    description: Optional[str] = None
 
 class TagCreate(TagBase):
     pass
@@ -65,6 +68,7 @@ class Tag(TagBase):
     class Config:
         from_attributes = True
 
+# --- UPDATED Blog Schemas ---
 class BlogBase(BaseModel):
     title: str
     slug: str
@@ -87,21 +91,25 @@ class BlogUpdate(BaseModel):
 class Blog(BlogBase):
     id: int
     author_id: int
-    author: UserBase
+    author: "UserBase" 
     category: Optional[Category] = None
     tags: List[Tag] = []
 
     class Config:
         from_attributes = True
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
+        
+# --- Dashboard Schema ---
 class DashboardStats(BaseModel):
     total_users: int
     published_blogs: int
     draft_blogs: int
     total_categories: int
     total_tags: int
+
+# --- Token Schema ---
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+# Forward reference resolution
+Blog.model_rebuild()

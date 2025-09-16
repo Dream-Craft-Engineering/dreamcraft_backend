@@ -77,8 +77,10 @@ def get_category(db: Session, category_id: int):
 def get_categories(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.BlogCategory).offset(skip).limit(limit).all()
 
+# --- THIS FUNCTION IS NOW FIXED ---
 def create_category(db: Session, category: schemas.CategoryCreate):
-    db_category = models.BlogCategory(name=category.name)
+    # Using **category.dict() unpacks all fields from the form (name and description)
+    db_category = models.BlogCategory(**category.dict())
     db.add(db_category)
     db.commit()
     db.refresh(db_category)
@@ -92,8 +94,10 @@ def get_tag(db: Session, tag_id: int):
 def get_tags(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.BlogTag).offset(skip).limit(limit).all()
 
+# --- THIS FUNCTION IS NOW FIXED ---
 def create_tag(db: Session, tag: schemas.TagCreate):
-    db_tag = models.BlogTag(name=tag.name)
+    # Using **tag.dict() unpacks all fields from the form
+    db_tag = models.BlogTag(**tag.dict())
     db.add(db_tag)
     db.commit()
     db.refresh(db_tag)
@@ -119,6 +123,15 @@ def create_blog(db: Session, blog: schemas.BlogCreate, author_id: int):
     db.refresh(db_blog)
     return db_blog
 
+def get_blog(db: Session, blog_id: int):
+
+    return db.query(models.Blog).options(
+        joinedload(models.Blog.author),
+        joinedload(models.Blog.category),
+        joinedload(models.Blog.tags)
+    ).filter(models.Blog.id == blog_id).first()
+
+
 def get_blog_by_slug(db: Session, slug: str):
     return db.query(models.Blog).options(
         joinedload(models.Blog.author),
@@ -133,6 +146,14 @@ def get_blogs(db: Session, skip: int = 0, limit: int = 100):
         joinedload(models.Blog.category),
         joinedload(models.Blog.tags)
     ).filter(models.Blog.status == 'published').offset(skip).limit(limit).all()
+
+
+def get_blogs_by_author(db: Session, author_id: int):
+ 
+    return db.query(models.Blog).options(
+        joinedload(models.Blog.category),
+        joinedload(models.Blog.tags)
+    ).filter(models.Blog.author_id == author_id).order_by(models.Blog.id.desc()).all()
 
 def update_blog(db: Session, blog_id: int, blog_update: schemas.BlogUpdate):
     db_blog = db.query(models.Blog).filter(models.Blog.id == blog_id).first()
@@ -176,3 +197,40 @@ def get_dashboard_stats(db: Session):
         total_categories=total_categories,
         total_tags=total_tags
     )
+
+def update_category(db: Session, category_id: int, category_update: schemas.CategoryCreate):
+    db_category = get_category(db, category_id)
+    if not db_category:
+        return None
+    update_data = category_update.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_category, key, value)
+    db.commit()
+    db.refresh(db_category)
+    return db_category
+
+def delete_category(db: Session, category_id: int):
+    db_category = get_category(db, category_id)
+    if db_category:
+        db.delete(db_category)
+        db.commit()
+    return db_category
+
+# === UPDATE Blog Tag CRUD Functions ===
+def update_tag(db: Session, tag_id: int, tag_update: schemas.TagCreate):
+    db_tag = get_tag(db, tag_id)
+    if not db_tag:
+        return None
+    update_data = tag_update.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_tag, key, value)
+    db.commit()
+    db.refresh(db_tag)
+    return db_tag
+
+def delete_tag(db: Session, tag_id: int):
+    db_tag = get_tag(db, tag_id)
+    if db_tag:
+        db.delete(db_tag)
+        db.commit()
+    return db_tag

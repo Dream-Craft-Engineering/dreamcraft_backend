@@ -13,12 +13,14 @@ class BlogCategory(Base):
     __tablename__ = "blog_categories"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, index=True)
+    description = Column(Text, nullable=True) 
     blogs = relationship("Blog", back_populates="category")
 
 class BlogTag(Base):
     __tablename__ = "blog_tags"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, index=True)
+    description = Column(Text, nullable=True) 
     blogs = relationship("Blog", secondary=blog_tag_association, back_populates="tags")
 
 
