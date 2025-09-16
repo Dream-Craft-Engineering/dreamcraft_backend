@@ -1,15 +1,20 @@
-from sqlalchemy.orm import Session,joinedload 
+from sqlalchemy.orm import Session, joinedload
 from . import models, schemas
 from .auth import hash_password
 
+# ==============================================================================
+# User CRUD Functions
+# ==============================================================================
+
 def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
+    # Eagerly load the user's role to prevent extra database queries
+    return db.query(models.User).options(joinedload(models.User.role)).filter(models.User.id == user_id).first()
 
 def get_user_by_email(db: Session, email: str):
-    return db.query(models.User).filter(models.User.email == email).first()
+    return db.query(models.User).options(joinedload(models.User.role)).filter(models.User.email == email).first()
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User).offset(skip).limit(limit).all()
+    return db.query(models.User).options(joinedload(models.User.role)).offset(skip).limit(limit).all()
 
 def create_user(db: Session, user: schemas.UserCreate):
     hashed_pw = hash_password(user.password)
@@ -18,7 +23,7 @@ def create_user(db: Session, user: schemas.UserCreate):
         name=user.name,
         phone_number=user.phone_number,
         hashed_password=hashed_pw,
-        role_id=user.role_id 
+        role_id=user.role_id
     )
     db.add(db_user)
     db.commit()
@@ -45,6 +50,9 @@ def delete_user(db: Session, user_id: int):
         db.commit()
     return db_user
 
+# ==============================================================================
+# Role CRUD Functions
+# ==============================================================================
 
 def get_role(db: Session, role_id: int):
     return db.query(models.Role).filter(models.Role.id == role_id).first()
@@ -59,17 +67,6 @@ def create_role(db: Session, role: schemas.RoleCreate):
     db.refresh(db_role)
     return db_role
 
-def update_role(db: Session, role_id: int, role_update: schemas.RoleUpdate):
-    db_role = get_role(db, role_id)
-    if not db_role:
-        return None
-    update_data = role_update.dict(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(db_role, key, value)
-    db.commit()
-    db.refresh(db_role)
-    return db_role
-
 def delete_role(db: Session, role_id: int):
     db_role = get_role(db, role_id)
     if db_role:
@@ -77,37 +74,116 @@ def delete_role(db: Session, role_id: int):
         db.commit()
     return db_role
 
+# ==============================================================================
+# Blog Category CRUD Functions
+# ==============================================================================
+
+def get_category(db: Session, category_id: int):
+    return db.query(models.BlogCategory).filter(models.BlogCategory.id == category_id).first()
+
+def get_categories(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.BlogCategory).offset(skip).limit(limit).all()
+
+def create_category(db: Session, category: schemas.CategoryCreate):
+    db_category = models.BlogCategory(name=category.name)
+    db.add(db_category)
+    db.commit()
+    db.refresh(db_category)
+    return db_category
+
+# ==============================================================================
+# Blog Tag CRUD Functions
+# ==============================================================================
+
+def get_tag(db: Session, tag_id: int):
+    return db.query(models.BlogTag).filter(models.BlogTag.id == tag_id).first()
+
+def get_tags(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.BlogTag).offset(skip).limit(limit).all()
+
+def create_tag(db: Session, tag: schemas.TagCreate):
+    db_tag = models.BlogTag(name=tag.name)
+    db.add(db_tag)
+    db.commit()
+    db.refresh(db_tag)
+    return db_tag
+
+# ==============================================================================
+# Blog Post CRUD Functions
+# ==============================================================================
 
 def create_blog(db: Session, blog: schemas.BlogCreate, author_id: int):
-    db_blog = models.Blog(**blog.dict(), author_id=author_id)
+    # Separate the tag_ids from the rest of the blog data
+    tag_ids = blog.tag_ids
+    blog_data = blog.dict(exclude={'tag_ids'})
+    
+    # Create the Blog model instance without the tags first
+    db_blog = models.Blog(**blog_data, author_id=author_id)
+    
+    # Fetch the actual Tag objects from the database using the provided IDs
+    if tag_ids:
+        tags = db.query(models.BlogTag).filter(models.BlogTag.id.in_(tag_ids)).all()
+        db_blog.tags = tags  # Assign the list of Tag objects
+        
     db.add(db_blog)
     db.commit()
     db.refresh(db_blog)
     return db_blog
 
-def get_blog(db: Session, blog_id: int):
-    return db.query(models.Blog).options(joinedload(models.Blog.author)).filter(models.Blog.id == blog_id).first()
-
 def get_blog_by_slug(db: Session, slug: str):
-    return db.query(models.Blog).options(joinedload(models.Blog.author)).filter(models.Blog.slug == slug).first()
+    return db.query(models.Blog).options(
+        joinedload(models.Blog.author),
+        joinedload(models.Blog.category),
+        joinedload(models.Blog.tags)
+    ).filter(models.Blog.slug == slug).first()
 
 def get_blogs(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Blog).options(joinedload(models.Blog.author)).offset(skip).limit(limit).all()
+    # Only return 'published' blogs to the public
+    return db.query(models.Blog).options(
+        joinedload(models.Blog.author),
+        joinedload(models.Blog.category),
+        joinedload(models.Blog.tags)
+    ).filter(models.Blog.status == 'published').offset(skip).limit(limit).all()
 
 def update_blog(db: Session, blog_id: int, blog_update: schemas.BlogUpdate):
-    db_blog = get_blog(db, blog_id)
+    db_blog = db.query(models.Blog).filter(models.Blog.id == blog_id).first()
     if not db_blog:
         return None
+
     update_data = blog_update.dict(exclude_unset=True)
+    
+    # Handle tag updates separately
+    if 'tag_ids' in update_data:
+        tag_ids = update_data.pop('tag_ids')
+        if tag_ids is not None:
+            tags = db.query(models.BlogTag).filter(models.BlogTag.id.in_(tag_ids)).all()
+            db_blog.tags = tags
+
+    # Update remaining fields
     for key, value in update_data.items():
         setattr(db_blog, key, value)
+        
     db.commit()
     db.refresh(db_blog)
     return db_blog
 
 def delete_blog(db: Session, blog_id: int):
-    db_blog = get_blog(db, blog_id)
+    db_blog = db.query(models.Blog).filter(models.Blog.id == blog_id).first()
     if db_blog:
         db.delete(db_blog)
         db.commit()
     return db_blog
+
+def get_dashboard_stats(db: Session):
+    total_users = db.query(models.User).count()
+    published_blogs = db.query(models.Blog).filter(models.Blog.status == 'published').count()
+    draft_blogs = db.query(models.Blog).filter(models.Blog.status == 'draft').count()
+    total_categories = db.query(models.BlogCategory).count()
+    total_tags = db.query(models.BlogTag).count()
+    return schemas.DashboardStats(
+        total_users=total_users,
+        published_blogs=published_blogs,
+        draft_blogs=draft_blogs,
+        total_categories=total_categories,
+        total_tags=total_tags
+    )
