@@ -72,7 +72,7 @@ def update_user_details(
 def delete_user(
     user_id: int, 
     db: Session = Depends(get_db), 
-    current_user: models.User = Depends(get_current_admin) # Keep this admin-only
+    current_user: models.User = Depends(get_current_admin) 
 ):
     """
     Delete a user. Accessible only by admins.
