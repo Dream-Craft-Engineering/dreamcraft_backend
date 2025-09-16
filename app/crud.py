@@ -234,3 +234,9 @@ def delete_tag(db: Session, tag_id: int):
         db.delete(db_tag)
         db.commit()
     return db_tag
+
+def get_all_blogs_for_dashboard(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Blog).options(
+        joinedload(models.Blog.author),
+        joinedload(models.Blog.category),
+    ).order_by(models.Blog.id.desc()).offset(skip).limit(limit).all()

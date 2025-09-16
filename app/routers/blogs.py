@@ -29,7 +29,13 @@ def read_my_blogs(
     return crud.get_blogs_by_author(db=db, author_id=current_user.id)
 
 
+@router.get("/dashboard-blogs", response_model=List[schemas.Blog])
+def read_blogs_for_dashboard(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user) # Now accessible by any user
+):
 
+    return crud.get_all_blogs_for_dashboard(db=db)
 
 @router.get("/{blog_id}", response_model=schemas.Blog)
 def read_blog_by_id(

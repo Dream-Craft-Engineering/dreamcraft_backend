@@ -34,28 +34,44 @@ def read_user(
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
+
+# --- NEW: Endpoint for a user to delete their own account ---
+@router.delete("/me", response_model=schemas.User)
+def delete_own_account(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Allows a logged-in user to delete their own account.
+    """
+    deleted_user = crud.delete_user(db, user_id=current_user.id)
+    if deleted_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return deleted_user
+
 @router.put("/{user_id}", response_model=schemas.User)
 def update_user_details(
     user_id: int, 
     user_update: schemas.UserUpdate, 
     db: Session = Depends(get_db), 
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(get_current_user) # Now depends on any logged-in user
 ):
     """
     Update a user's details.
     - Admins can update any user.
     - Regular users can only update their own profile.
     """
-    
     is_admin = current_user.role.name.lower() == 'admin'
+    
+    # Check if the user has permission to perform the update
     if not is_admin and current_user.id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to update this user"
         )
         
-    
-    if not is_admin and user_update.role_id is not None:
+    # Prevent non-admins from changing a role_id
+    if not is_admin and user_update.role_id is not None and user_update.role_id != current_user.role_id:
          raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to change user roles"
@@ -67,16 +83,16 @@ def update_user_details(
     return updated_user
 
 @router.delete("/{user_id}", response_model=schemas.User)
-def delete_user(
+def delete_another_user(
     user_id: int, 
     db: Session = Depends(get_db), 
-    current_user: models.User = Depends(get_current_admin) 
+    current_user: models.User = Depends(get_current_admin) # This remains admin-only
 ):
     """
-    Delete a user. Accessible only by admins.
+    Allows an admin to delete another user.
     """
     if user_id == current_user.id:
-        raise HTTPException(status_code=400, detail="Cannot delete yourself")
+        raise HTTPException(status_code=400, detail="Admins cannot delete themselves using this route.")
     
     deleted_user = crud.delete_user(db, user_id)
     if deleted_user is None:
