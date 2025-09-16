@@ -1,6 +1,6 @@
 # backend/app/schemas.py
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List # <--- THIS IS THE FIX
+from typing import Optional, List 
 
 # --- Role Schemas ---
 class RoleBase(BaseModel):
@@ -42,7 +42,6 @@ class UserUpdate(BaseModel):
     is_active: Optional[bool] = None
     role_id: Optional[int] = None
 
-# --- NEW Category Schemas ---
 class CategoryBase(BaseModel):
     name: str
 
@@ -54,7 +53,7 @@ class Category(CategoryBase):
     class Config:
         from_attributes = True
 
-# --- NEW Tag Schemas ---
+
 class TagBase(BaseModel):
     name: str
 
@@ -66,7 +65,6 @@ class Tag(TagBase):
     class Config:
         from_attributes = True
 
-# --- UPDATED Blog Schemas ---
 class BlogBase(BaseModel):
     title: str
     slug: str
@@ -96,7 +94,7 @@ class Blog(BlogBase):
     class Config:
         from_attributes = True
 
-# --- Token Schema ---
+
 class Token(BaseModel):
     access_token: str
     token_type: str

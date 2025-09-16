@@ -14,7 +14,7 @@ class Settings(BaseSettings):
         "mysql+pymysql://root:DreamCraft10@localhost:3306/dreamcraft_db", env="DATABASE_URL"
     )
 
-    # CORS (for Next.js frontend)
+    
     backend_cors_origins: List[str] = Field(default=["http://localhost:3000"], env="BACKEND_CORS_ORIGINS")
 
 settings = Settings()

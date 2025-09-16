@@ -10,11 +10,9 @@ def read_users(
     skip: int = 0, 
     limit: int = 100, 
     db: Session = Depends(get_db), 
-    current_user: models.User = Depends(get_current_user) # Changed to any logged-in user
+    current_user: models.User = Depends(get_current_user) 
 ):
-    """
-    Retrieve all users. Accessible by any logged-in user.
-    """
+   
     users = crud.get_users(db, skip=skip, limit=limit)
     return users
 
@@ -26,7 +24,7 @@ def read_users_me(current_user: models.User = Depends(get_current_user)):
 def read_user(
     user_id: int, 
     db: Session = Depends(get_db), 
-    current_user: models.User = Depends(get_current_user) # Changed to any logged-in user
+    current_user: models.User = Depends(get_current_user) 
 ):
     """
     Retrieve a single user by ID. Accessible by any logged-in user.
@@ -48,7 +46,7 @@ def update_user_details(
     - Admins can update any user.
     - Regular users can only update their own profile.
     """
-    # Check for permissions
+    
     is_admin = current_user.role.name.lower() == 'admin'
     if not is_admin and current_user.id != user_id:
         raise HTTPException(
@@ -56,7 +54,7 @@ def update_user_details(
             detail="Not authorized to update this user"
         )
         
-    # Prevent non-admins from changing a role_id
+    
     if not is_admin and user_update.role_id is not None:
          raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

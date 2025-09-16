@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles # <--- THIS IS THE FIX
+from fastapi.staticfiles import StaticFiles 
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from .models import Base
@@ -8,7 +8,7 @@ from .core import settings
 
 app = FastAPI(title="DreamCraft Engineering Backend")
 
-# This makes the 'static' folder available at the /static URL
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # CORS middleware

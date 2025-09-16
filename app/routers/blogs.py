@@ -13,9 +13,7 @@ def create_new_blog(
     db: Session = Depends(get_db), 
     current_user: models.User = Depends(get_current_user)
 ):
-    """
-    Create a new blog post. The author is the currently logged-in user.
-    """
+    
     return crud.create_blog(db=db, blog=blog, author_id=current_user.id)
 
 
