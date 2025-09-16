@@ -17,7 +17,7 @@ class User(Base):
     hashed_password = Column(String(128), nullable=False)
     is_active = Column(Boolean, default=True)
     
-    # Add the relationship to Role
+   
     role_id = Column(Integer, ForeignKey("roles.id"))
     role = relationship("Role", back_populates="users")
 
@@ -35,9 +35,9 @@ class Blog(Base):
     excerpt = Column(Text)
     is_featured = Column(Boolean, default=False)
 
-    # CHANGE THIS SECTION
-    image_url = Column(String(255)) # Main thumbnail image
-    image_url_2 = Column(String(255), nullable=True) # Optional second image
-    image_url_3 = Column(String(255), nullable=True) # Optional third image
+   
+    image_url = Column(String(255)) 
+    image_url_2 = Column(String(255), nullable=True) 
+    image_url_3 = Column(String(255), nullable=True) 
 
     author = relationship("User", back_populates="blogs")

@@ -1,4 +1,3 @@
-# backend/app/schemas.py
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
@@ -33,7 +32,7 @@ class User(UserBase):
 # --- THIS IS THE CORRECTED CLASS ---
 class UserCreate(UserBase):
     password: str
-    role_id: int # The role_id field must be here
+    role_id: int 
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None

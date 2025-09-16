@@ -4,8 +4,7 @@ from typing import List
 from pydantic import ConfigDict
 
 class Settings(BaseSettings):
-    model_config = ConfigDict(env_file=".env", extra="ignore")  # Ignore unknown env vars
-
+    model_config = ConfigDict(env_file=".env", extra="ignore")  
     # Application config
     app_name: str = Field("DreamCraft Engineering Backend", env="APP_NAME")
     python_env: str = Field("development", env="PYTHON_ENV")

@@ -1,11 +1,10 @@
-# backend/app/auth.py
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from dotenv import load_dotenv
 import os
 
-load_dotenv()  # Load .env file
+load_dotenv()  
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"

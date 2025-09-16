@@ -1,4 +1,3 @@
-# backend/app/crud.py
 from sqlalchemy.orm import Session,joinedload 
 from . import models, schemas
 from .auth import hash_password
@@ -19,7 +18,7 @@ def create_user(db: Session, user: schemas.UserCreate):
         name=user.name,
         phone_number=user.phone_number,
         hashed_password=hashed_pw,
-        role_id=user.role_id # Add role_id
+        role_id=user.role_id 
     )
     db.add(db_user)
     db.commit()
