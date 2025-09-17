@@ -63,7 +63,6 @@ def read_blog_by_slug(slug: str, db: Session = Depends(get_db)):
     return db_blog
 
 
-# Update a blog post (Owner or Admin)
 @router.put("/{blog_id}", response_model=schemas.Blog)
 def update_blog_post(
     blog_id: int,
