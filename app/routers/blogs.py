@@ -29,12 +29,26 @@ def read_my_blogs(
     return crud.get_blogs_by_author(db=db, author_id=current_user.id)
 
 
+# @router.get("/by-id/{blog_id}", response_model=schemas.Blog)
+# def read_blog_by_id(
+#     blog_id: int, 
+#     db: Session = Depends(get_db),
+#     current_user: models.User = Depends(get_current_user)
+# ):
+#     db_blog = crud.get_blog(db, blog_id=blog_id)
+#     if db_blog is None:
+#         raise HTTPException(status_code=404, detail="Blog not found")
+#     return db_blog
+
 @router.get("/by-id/{blog_id}", response_model=schemas.Blog)
 def read_blog_by_id(
     blog_id: int, 
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
+    """
+    Fetch a single blog post by its unique integer ID for the admin edit page.
+    """
     db_blog = crud.get_blog(db, blog_id=blog_id)
     if db_blog is None:
         raise HTTPException(status_code=404, detail="Blog not found")
