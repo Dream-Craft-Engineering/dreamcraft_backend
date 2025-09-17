@@ -15,10 +15,10 @@ def create_new_blog(
 ):
     return crud.create_blog(db=db, blog=blog, author_id=current_user.id)
 
+
 @router.get("/", response_model=List[schemas.Blog])
 def read_published_blogs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    blogs = crud.get_blogs(db, skip=skip, limit=limit)
-    return blogs
+    return crud.get_blogs(db, skip=skip, limit=limit)
 
 
 @router.get("/my-blogs", response_model=List[schemas.Blog])
@@ -29,40 +29,17 @@ def read_my_blogs(
     return crud.get_blogs_by_author(db=db, author_id=current_user.id)
 
 
-@router.get("/dashboard-blogs", response_model=List[schemas.Blog])
-def read_blogs_for_dashboard(
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user) # Now accessible by any user
-):
-
-    return crud.get_all_blogs_for_dashboard(db=db)
-
-@router.get("/{blog_id}", response_model=schemas.Blog)
-def read_blog_by_id(
-    blog_id: int,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user) 
-):
-    db_blog = crud.get_blog(db, blog_id=blog_id)
-    if db_blog is None:
-        raise HTTPException(status_code=404, detail="Blog not found")
-    return db_blog
-
-
 @router.get("/by-id/{blog_id}", response_model=schemas.Blog)
 def read_blog_by_id(
     blog_id: int, 
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    """
-    Fetch a single blog post by its unique integer ID.
-    Used for the admin edit page.
-    """
     db_blog = crud.get_blog(db, blog_id=blog_id)
     if db_blog is None:
         raise HTTPException(status_code=404, detail="Blog not found")
     return db_blog
+
 
 @router.get("/{slug}", response_model=schemas.Blog)
 def read_blog_by_slug(slug: str, db: Session = Depends(get_db)):
@@ -72,6 +49,7 @@ def read_blog_by_slug(slug: str, db: Session = Depends(get_db)):
     return db_blog
 
 
+# Update a blog post (Owner or Admin)
 @router.put("/{blog_id}", response_model=schemas.Blog)
 def update_blog_post(
     blog_id: int,
@@ -86,7 +64,7 @@ def update_blog_post(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this post")
     return crud.update_blog(db=db, blog_id=blog_id, blog_update=blog_update)
 
-
+# Delete a blog post (Owner or Admin) 
 @router.delete("/{blog_id}", response_model=schemas.Blog)
 def delete_blog_post(
     blog_id: int,

@@ -137,7 +137,10 @@ def get_blog_by_slug(db: Session, slug: str):
         joinedload(models.Blog.author),
         joinedload(models.Blog.category),
         joinedload(models.Blog.tags)
-    ).filter(models.Blog.slug == slug).first()
+    ).filter(
+        models.Blog.slug == slug,
+        models.Blog.status == 'published'
+    ).first()
 
 def get_blogs(db: Session, skip: int = 0, limit: int = 100):
     
