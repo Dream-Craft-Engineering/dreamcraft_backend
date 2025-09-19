@@ -13,11 +13,11 @@ class Settings(BaseSettings):
     database_url: str = Field(
         "mysql+pymysql://root:DreamCraft10@localhost:3306/dreamcraft_db", env="DATABASE_URL"
     )
-
-    
     backend_cors_origins: List[str] = Field(
-    default=["http://localhost:3000"],
-    env="BACKEND_CORS_ORIGINS"
-)
+        default=["http://localhost:3000"],
+        env="BACKEND_CORS_ORIGINS"
+    )
+
+
 
 settings = Settings()
