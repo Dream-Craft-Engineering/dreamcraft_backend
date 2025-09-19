@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     )
 
     
-    backend_cors_origins: List[str] = Field(default=["http://localhost:3000"], env="BACKEND_CORS_ORIGINS")
+    backend_cors_origins: List[str] = Field(
+    default=["http://localhost:3000"],
+    env="BACKEND_CORS_ORIGINS"
+)
 
 settings = Settings()
