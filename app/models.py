@@ -62,4 +62,28 @@ class Blog(Base):
     
     
     tags = relationship("BlogTag", secondary=blog_tag_association, back_populates="blogs")
+
+class Project(Base):
+    __tablename__ = "projects"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    category = Column(String(100), nullable=False) 
+    location = Column(String(255), nullable=False)
+    image_url = Column(String(255)) 
+    
+    client = Column(String(255))
+    completion_date = Column(String(100)) 
+    value = Column(String(100)) 
+    description = Column(Text, nullable=True)
+
+
+    images = relationship("ProjectImage", back_populates="project", cascade="all, delete-orphan")
+
+class ProjectImage(Base):
+    __tablename__ = "project_images"
+    id = Column(Integer, primary_key=True, index=True)
+    url = Column(String(255), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id"))
+    
+    project = relationship("Project", back_populates="images")
     

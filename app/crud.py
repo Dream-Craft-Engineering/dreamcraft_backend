@@ -243,3 +243,61 @@ def get_all_blogs_for_dashboard(db: Session, skip: int = 0, limit: int = 100):
         joinedload(models.Blog.author),
         joinedload(models.Blog.category),
     ).order_by(models.Blog.id.desc()).offset(skip).limit(limit).all()
+
+
+
+
+def get_project(db: Session, project_id: int):
+    return db.query(models.Project).options(joinedload(models.Project.images)).filter(models.Project.id == project_id).first()
+
+def get_projects(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Project).options(joinedload(models.Project.images)).order_by(models.Project.id.desc()).offset(skip).limit(limit).all()
+
+def create_project(db: Session, project: schemas.ProjectCreate):
+
+    gallery_urls = project.gallery_urls
+    project_data = project.dict(exclude={'gallery_urls'})
+    
+
+    db_project = models.Project(**project_data)
+    db.add(db_project)
+    db.commit()
+    db.refresh(db_project)
+
+    if gallery_urls:
+        for url in gallery_urls:
+            db_image = models.ProjectImage(url=url, project_id=db_project.id)
+            db.add(db_image)
+        db.commit()
+        db.refresh(db_project)
+    
+    return db_project
+
+def update_project(db: Session, project_id: int, project_update: schemas.ProjectUpdate):
+    db_project = get_project(db, project_id)
+    if not db_project:
+        return None
+
+    update_data = project_update.dict(exclude_unset=True)
+    
+    if 'gallery_urls' in update_data:
+        new_urls = update_data.pop('gallery_urls')
+        db.query(models.ProjectImage).filter(models.ProjectImage.project_id == project_id).delete()
+        for url in new_urls:
+            db_image = models.ProjectImage(url=url, project_id=project_id)
+            db.add(db_image)
+
+
+    for key, value in update_data.items():
+        setattr(db_project, key, value)
+
+    db.commit()
+    db.refresh(db_project)
+    return db_project
+
+def delete_project(db: Session, project_id: int):
+    db_project = get_project(db, project_id)
+    if db_project:
+        db.delete(db_project)
+        db.commit()
+    return db_project

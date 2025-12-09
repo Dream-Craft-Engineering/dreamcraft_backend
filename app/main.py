@@ -2,9 +2,12 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles 
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
+from . import models
 from .models import Base
-from .routers import auth, users, blogs, roles, categories, tags, upload, dashboard
+from .routers import auth, users, blogs, roles, categories, tags, upload, dashboard, projects
 from .core import settings
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="DreamCraft Engineering Backend")
 
@@ -29,3 +32,4 @@ app.include_router(categories.router)
 app.include_router(tags.router)
 app.include_router(upload.router)
 app.include_router(dashboard.router)
+app.include_router(projects.router)

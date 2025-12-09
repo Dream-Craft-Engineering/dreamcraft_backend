@@ -113,3 +113,47 @@ class Token(BaseModel):
 
 # Forward reference resolution
 Blog.model_rebuild()
+
+class ProjectImageBase(BaseModel):
+    url: str
+
+class ProjectImageCreate(ProjectImageBase):
+    pass
+
+class ProjectImage(ProjectImageBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+
+class ProjectBase(BaseModel):
+    title: str
+    category: str
+    location: str
+    image_url: str
+    client: str
+    completion_date: str
+    value: str
+    description: str
+
+class ProjectCreate(ProjectBase):
+
+    gallery_urls: List[str] = []
+
+class ProjectUpdate(BaseModel):
+    title: Optional[str] = None
+    category: Optional[str] = None
+    location: Optional[str] = None
+    image_url: Optional[str] = None
+    client: Optional[str] = None
+    completion_date: Optional[str] = None
+    value: Optional[str] = None
+    description: Optional[str] = None
+    gallery_urls: Optional[List[str]] = None
+
+class Project(ProjectBase):
+    id: int
+    images: List[ProjectImage] = [] 
+
+    class Config:
+        from_attributes = True
