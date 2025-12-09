@@ -125,20 +125,18 @@ class ProjectImage(ProjectImageBase):
     class Config:
         from_attributes = True
 
-
 class ProjectBase(BaseModel):
     title: str
     category: str
     location: str
-    image_url: str
-    client: str
-    completion_date: str
-    value: str
-    description: str
+    image_url: Optional[str] = None 
+    client: Optional[str] = None
+    completion_date: Optional[str] = None
+    value: Optional[str] = None
+    description: Optional[str] = None
 
 class ProjectCreate(ProjectBase):
-
-    gallery_urls: List[str] = []
+    gallery_urls: List[str] = [] 
 
 class ProjectUpdate(BaseModel):
     title: Optional[str] = None
