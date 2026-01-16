@@ -34,7 +34,7 @@ class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
-    email = Column(String(255), unique=True, index=True, nullable=False)
+    email = Column(String(191), unique=True, index=True, nullable=False)
     phone_number = Column(String(20), nullable=True)
     hashed_password = Column(String(128), nullable=False)
     is_active = Column(Boolean, default=True)
@@ -47,10 +47,10 @@ class User(Base):
 class Blog(Base):
     __tablename__ = "blogs"
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(255), nullable=False)
-    slug = Column(String(255), unique=True, index=True, nullable=False)
+    title = Column(String(191), nullable=False)
+    slug = Column(String(191), unique=True, index=True, nullable=False)
     content = Column(Text, nullable=False)
-    image_url = Column(String(255)) 
+    image_url = Column(String(191)) 
     
     status = Column(Enum('draft', 'published', name='blogstatusenum'), default='draft', nullable=False)
 
@@ -66,12 +66,12 @@ class Blog(Base):
 class Project(Base):
     __tablename__ = "projects"
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(255), nullable=False)
+    title = Column(String(191), nullable=False)
     category = Column(String(100), nullable=False) 
-    location = Column(String(255), nullable=False)
-    image_url = Column(String(255)) 
+    location = Column(String(191), nullable=False)
+    image_url = Column(String(191)) 
     
-    client = Column(String(255))
+    client = Column(String(191))
     completion_date = Column(String(100)) 
     value = Column(String(100)) 
     description = Column(Text, nullable=True)
@@ -82,7 +82,7 @@ class Project(Base):
 class ProjectImage(Base):
     __tablename__ = "project_images"
     id = Column(Integer, primary_key=True, index=True)
-    url = Column(String(255), nullable=False)
+    url = Column(String(191), nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id"))
     
     project = relationship("Project", back_populates="images")
