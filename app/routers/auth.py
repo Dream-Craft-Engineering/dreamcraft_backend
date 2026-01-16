@@ -3,7 +3,28 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from .. import crud, schemas
 from ..deps import get_db
-from ..auth import verify_password, create_access_token
+from ..auth import create_access_token
+from passlib.context import CryptContext
+
+# -----------------------------
+# Password hashing setup
+# -----------------------------
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+MAX_BCRYPT_BYTES = 72  # bcrypt maximum password length
+
+def hash_password(password: str) -> str:
+    """
+    Hash a password safely with bcrypt, truncating to 72 bytes if necessary.
+    """
+    pw_bytes = password.encode("utf-8")[:MAX_BCRYPT_BYTES]
+    return pwd_context.hash(pw_bytes)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Verify a password against a bcrypt hash.
+    """
+    pw_bytes = plain_password.encode("utf-8")[:MAX_BCRYPT_BYTES]
+    return pwd_context.verify(pw_bytes, hashed_password)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

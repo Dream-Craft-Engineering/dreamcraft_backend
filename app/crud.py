@@ -2,8 +2,6 @@ from sqlalchemy.orm import Session, joinedload
 from . import models, schemas
 from .auth import hash_password
 
-
-
 def get_user(db: Session, user_id: int):
     # Eagerly load the user's role to prevent extra database queries
     return db.query(models.User).options(joinedload(models.User.role)).filter(models.User.id == user_id).first()
