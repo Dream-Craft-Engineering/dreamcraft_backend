@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session, joinedload
 from . import models, schemas
 from .auth import hash_password
+import os
+from fastapi import HTTPException
 
 def get_user(db: Session, user_id: int):
     # Eagerly load the user's role to prevent extra database queries
@@ -180,9 +182,21 @@ def update_blog(db: Session, blog_id: int, blog_update: schemas.BlogUpdate):
 
 def delete_blog(db: Session, blog_id: int):
     db_blog = db.query(models.Blog).filter(models.Blog.id == blog_id).first()
+    
     if db_blog:
+        # Delete associated image file if it exists
+        if db_blog.image_url:
+            file_path = db_blog.image_url.lstrip("/")  # convert URL to filesystem path
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                except Exception as e:
+                    raise HTTPException(status_code=500, detail=f"Failed to delete image file: {e}")
+        
+        # Delete the blog record from the database
         db.delete(db_blog)
         db.commit()
+    
     return db_blog
 
 def get_dashboard_stats(db: Session):
