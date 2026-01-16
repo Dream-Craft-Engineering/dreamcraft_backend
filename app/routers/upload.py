@@ -15,7 +15,7 @@ async def upload_image(
     Uploads an image, saves it, and returns the public URL.
     """
     
-    save_path = "upload/images"
+    save_path = "uploads/images"
     
    
     unique_id = uuid.uuid4().hex
@@ -33,4 +33,4 @@ async def upload_image(
         raise HTTPException(status_code=500, detail=f"Failed to save file: {e}")
 
    
-    return {"file_url": f"/upload/images/{unique_filename}"}
+    return {"file_url": f"/uploads/images/{unique_filename}"}
