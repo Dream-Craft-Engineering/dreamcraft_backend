@@ -13,6 +13,7 @@ app = FastAPI(title="DreamCraft Engineering Backend")
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # CORS middleware
 app.add_middleware(
